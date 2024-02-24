@@ -27,3 +27,4 @@ python ravlt_audio_gui.py
 11)  After finishing all checks on the word, you will press *Next Row* to move on to the next word. 
 12)  **Additional Usability**: There's a *Search* button at the *Bottom-Right of GUI* that, once pressed, a text box can be used to search for a specific word or onset (e.g. if the .csv lists 'Curtain' being said at 6.4s, you can type in 'curtain' or 6 and press *Search*). Otherwise, the *Restart*, *Refresh*, *Play Full Audio*, and *Zoom* buttons are pretty self explanatory.
 13)  **Progressing** Once finished with a row, press *Next Row* to continue to check the next one. Once finished with a file, text will appear in the *Bottom-Right of GUI* saying 'Press the 'Start' button the begin the next file'. Continue validating until all files in the folder have been validated. # RAVLT_audio_gui
+# RAVLT_audio_gui
