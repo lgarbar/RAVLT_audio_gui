@@ -29,3 +29,4 @@ python ravlt_audio_gui.py
 13)  **Progressing** Once finished with a row, press *Next Row* to continue to check the next one. Once finished with a file, text will appear in the *Bottom-Right of GUI* saying 'Press the 'Start' button the begin the next file'. Continue validating until all files in the folder have been validated. # RAVLT_audio_gui
 # RAVLT_audio_gui
 # RAVLT_audio_gui
+# RAVLT_audio_gui
