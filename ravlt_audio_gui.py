@@ -140,7 +140,7 @@ class AudioPlayerApp:
 
         self.import_button = tk.Button(self.root, text="Import", command=lambda: self.import_data(False))
         self.import_button.grid(row=7, column=0, padx=10, pady=0)
-
+        
         self.whole_audio_button = tk.Button(self.root, text="Play Full Audio", state=tk.DISABLED, command=self.play_full_audio)
         self.whole_audio_button.grid(row=8, column=0, padx=10, pady=0)
 
@@ -160,19 +160,19 @@ class AudioPlayerApp:
         self.label_display_3 = tk.Label(self.root, textvariable=self.edit_label)
         self.label_display_3.grid(row=3, column=1, padx=0, pady=0)
 
-        self.start_edit_button = tk.Button(self.root, text="Start Edit", state=tk.DISABLED, command=lambda: self.mark_edit_label('edit', 'edit'), bg='red')
+        self.start_edit_button = tk.Button(self.root, text="Start Edit", state=tk.DISABLED, command=lambda: self.open_popup('edit'), bg='red')
         self.start_edit_button.grid(row=4, column=1, padx=0, pady=0)
 
-        self.save_edit_button = tk.Button(self.root, text="Save Edit", state=tk.DISABLED, command=lambda: self.open_popup('edit'), bg='red')
+        self.save_edit_button = tk.Button(self.root, text="Save Edit", state=tk.DISABLED, command=lambda: self.mark_edit_label('edit', 'edit'), bg='red')
         self.save_edit_button.grid(row=5, column=1, padx=0, pady=0)
         
         self.drop_button = tk.Button(self.root, text="Drop", state=tk.DISABLED, command=lambda: self.mark_edit_label('drop', 'drop'), bg='yellow')
         self.drop_button.grid(row=6, column=1, padx=0, pady=0)
 
-        self.start_insert_button = tk.Button(self.root, text="Start Insert", state=tk.DISABLED, command=lambda: self.mark_edit_label('insert', 'insert'), bg='blue')
+        self.start_insert_button = tk.Button(self.root, text="Start Insert", state=tk.DISABLED, command=lambda: self.open_popup('insert'), bg='blue')
         self.start_insert_button.grid(row=7, column=1, padx=0)
 
-        self.save_insert_button = tk.Button(self.root, text="Save Insert", state=tk.DISABLED, command=lambda: self.open_popup('insert'), bg='blue')
+        self.save_insert_button = tk.Button(self.root, text="Save Insert", state=tk.DISABLED, command=lambda: self.mark_edit_label('insert', 'insert'), bg='blue')
         self.save_insert_button.grid(row=8, column=1, padx=0)
 
         # RIGHT COLUMN
@@ -198,6 +198,9 @@ class AudioPlayerApp:
 
         self.search_result_label = tk.Label(self.root, text="")
         self.search_result_label.grid(row=7, column=2, padx=10)
+        
+        self.play_current_audio = tk.Button(self.root, text="Play Current Audio", command=self.play_audio_segment)
+        self.play_current_audio.grid(row=8, column=2, padx=10, pady=0)
         
     def open_popup(self, button_val):
         def get_text_and_continue():
@@ -589,12 +592,15 @@ class AudioPlayerApp:
         self.search_button.config(state=tk.NORMAL)
 
         self.display_word()
+        self.update_plot()
         self.root.update()
+        
+        self.rename_old_files()
 
-        if AUDIO_ENABLED:
-            # Check if there's a valid audio segment
-            if self.audio_segment is not None:
-                self.play_audio_segment()
+        # if AUDIO_ENABLED:
+        #     # Check if there's a valid audio segment
+        #     if self.audio_segment is not None:
+        #         self.play_audio_segment()
 
     def get_audio_segment(self):
         if AUDIO_ENABLED:
@@ -642,12 +648,13 @@ class AudioPlayerApp:
 
             # Update csv display
             self.display_csv()
+            self.update_plot()
             self.root.update()
         
             # Play the audio for the new row
-            if AUDIO_ENABLED:
-                self.audio_segment = self.get_audio_segment()
-                self.play_audio_segment()
+            # if AUDIO_ENABLED:
+            #     self.audio_segment = self.get_audio_segment()
+            #     self.play_audio_segment()
         
             # Check if it's the last row and if a validation button has been pressed
             if self.current_index == len(self.df) - 1 and self.validation_pressed:
@@ -701,14 +708,39 @@ class AudioPlayerApp:
         # Save the data
         self.save_data()
 
-    def save_data(self):
-        # Save the edited dataframe to a new CSV file
+    def rename_old_files(self):
         directory = f'{self.edited_folder}/{os.path.basename(os.path.dirname(self.file_path))}'
         os.makedirs(directory, exist_ok=True)
-        edited_file_path = os.path.join(directory, f'{os.path.splitext(os.path.basename(self.file_path))[0]}_edited_file.csv')
-        self.df.to_csv(edited_file_path, index=False)
+        
+        base_filename = os.path.splitext(os.path.basename(self.file_path))[0]
+        self.edited_file_path = os.path.join(directory, f'{base_filename}_edited_file.csv')
+        
+        # Check if the file already exists
+        index = 0
+        existing_file = self.edited_file_path
+        while os.path.exists(existing_file):
+            # Rename the existing file
+            new_name = f'{base_filename}_edited_file_OLD{"_" + str(index) if index > 0 else ""}.csv'
+            new_file_path = os.path.join(directory, new_name)
+        
+            # Move to the next file
+            existing_file = new_file_path
+            index += 1
+        # Rename existing files if necessary, starting from the file with the highest index
+        for i in range(index-1, 0, -1):
+            old_file_path = os.path.join(directory, f'{base_filename}_edited_file_OLD{"_" + str(i-1) if i > 1 else ""}.csv')
+            new_file_path = os.path.join(directory, f'{base_filename}_edited_file_OLD_{i}.csv')
+            os.rename(old_file_path, new_file_path)
+            
+        # Rename the original file if it exists
+        if index > 0:
+            os.rename(self.edited_file_path, os.path.join(directory, f'{base_filename}_edited_file_OLD.csv'))
+    
+    def save_data(self):
+        # Save the DataFrame to CSV
+        self.df.to_csv(self.edited_file_path, index=False)
 
-        print(f"Changes saved to: {edited_file_path}")
+        print(f"Changes saved to: {self.edited_file_path}")
 
     def import_data(self, file):
         if not file:
@@ -826,26 +858,33 @@ class AudioPlayerApp:
             else:
                 if label == 'edit':
                     if self.edit:
-                        self.edit_data(data)
+                        self.edit_data(self.new_word)
                         self.save_edit_button.config(state=tk.DISABLED)
+                        self.edit = False
+                        self.onset_position = None
                     else:
                         self.edit = True
+                        self.new_word = data
                         self.start_edit_button.config(state=tk.DISABLED)
                         self.save_edit_button.config(state=tk.NORMAL)
                 elif label == 'insert':
                     if self.insert:
                         if data != '':
-                            self.insert_data(data)
-                            self.save_insert_button.config(state=tk.DISABLED)
-                            self.blue_end_line.set_visible(False)
-                            self.blue_start_line.set_visible(False)
-                            self.blue_highlight_space.set_visible(False)
+                            self.insert_data(self.new_word)
                         else:
                             messagebox.showinfo("Insert Popup", "Make you've input a word into the space below")
+                        self.save_insert_button.config(state=tk.DISABLED)
+                        self.blue_end_line.set_visible(False)
+                        self.blue_start_line.set_visible(False)
+                        self.blue_highlight_space.set_visible(False)
+                        self.insert = False
+                        self.onset_position = None
                     else:
                         self.insert = True
+                        self.new_word = data
                         self.start_insert_button.config(state=tk.DISABLED)
                         self.save_insert_button.config(state=tk.NORMAL)
+                        
             
             self.root.update()
             
