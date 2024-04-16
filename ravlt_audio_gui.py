@@ -343,6 +343,7 @@ class AudioPlayerApp:
         self.blue_highlight_space = plt.axvspan(self.start_section, self.end_section, color='blue', alpha=0, label='Insert Area', visible=False)
         self.blue_end_line = self.ax.axvline(x=self.end_section, color='blue', linestyle='-', linewidth=1, visible=False)
         
+        self.ax.set_xlim(self.x_range)
         self.ax.set_ylim(-1, 1)
         self.ax.set_xlabel('Time (seconds)')
         self.ax.set_ylabel('Amplitude')
@@ -757,13 +758,12 @@ class AudioPlayerApp:
                 print(e)
                 
         self.file_path = self.files[self.current_file]
-        # self.file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         dir = self.file_path.split('/')
         self.name = dir[-1].split('_')[0]
         self.task_text.set(f'Now displaying: {self.name}')
         self.audio_file_path = (f"{'/'.join(dir[:-1])}/{self.name}.wav")
         audio_list = self.audio_file_path.split('/')
-        audio_list[-3] = 'RAVLT'
+        audio_list[-3] = 'audio_transcripts'
         self.audio_file_path = '/'.join(audio_list)
         if self.file_path:
             self.df = pd.read_csv(self.file_path)
@@ -771,12 +771,13 @@ class AudioPlayerApp:
             self.df = self.df.copy()
             # Display CSV content in the Text widget
             self.display_csv()
-            # Replace this with logic to load audio duration
             self.audio_duration = self.get_audio_duration(self.audio_file_path)/1000
             self.audio_data = self.load_audio()
             self.initial_x_range = (0, self.audio_duration)
             self.x_range = self.initial_x_range
             self.init_plot()
+            self.canvas.draw()
+            # self.update_plot()
                 
             # Add Column6 if not already present
             if 'quality_check_label' not in self.df.columns:
