@@ -1,4 +1,3 @@
-from sys import settrace
 import tkinter as tk
 from tkinter import filedialog, simpledialog, ttk, messagebox
 import os
@@ -204,16 +203,16 @@ class AudioPlayerApp:
         self.play_current_audio.grid(row=8, column=2, padx=10, pady=0)
         
     def open_popup(self, button_val):
-        self.next_row_button.config(state=tk.DISABLED)
-
         def get_text_and_continue():
             entered_text = entry_var.get()
             print("Entered text:", entered_text)
             if button_val == 'search':
                 self.search_data(entered_text)
             elif button_val == 'insert':
+                self.next_row_button.config(state=tk.DISABLED)
                 self.mark_edit_label(button_val, entered_text)
             else:
+                self.next_row_button.config(state=tk.DISABLED)
                 self.mark_edit_label(button_val, entered_text)
             # You can use 'entered_text' as needed
             popup.destroy()  # Close the popup window
@@ -747,24 +746,18 @@ class AudioPlayerApp:
         print(f"Changes saved to: {self.edited_file_path}")
 
     def import_data(self, file):
-        print('importing')
         if not file:
             try:
-                print('trying import')
-                self.root.withdraw()
                 folder_path = filedialog.askdirectory(title="Select Folder")
                 self.files = []
                 for filename in os.listdir(folder_path):
                     if filename.endswith(".csv") and "Recall" in filename:
                         self.file_path = os.path.join(folder_path, filename)
                         self.files.append(self.file_path)
-                print('import successful')
                 self.current_file = 0
                 self.files.sort()
             except Exception as e:
                 print(e)
-
-        print('still importing')
                 
         self.file_path = self.files[self.current_file]
         dir = self.file_path.split('/')
@@ -878,6 +871,8 @@ class AudioPlayerApp:
                         self.new_word = data
                         self.start_edit_button.config(state=tk.DISABLED)
                         self.save_edit_button.config(state=tk.NORMAL)
+                        self.start_insert_button.config(state=tk.DISABLED)
+                        self.save_insert_button.config(state=tk.DISABLED)
                 elif label == 'insert':
                     if self.insert:
                         if data != '':
@@ -896,6 +891,8 @@ class AudioPlayerApp:
                         self.new_word = data
                         self.start_insert_button.config(state=tk.DISABLED)
                         self.save_insert_button.config(state=tk.NORMAL)
+                        self.start_edit_button.config(state=tk.DISABLED)
+                        self.save_edit_button.config(state=tk.DISABLED)
                         
             
             self.root.update()

@@ -1,7 +1,5 @@
-tkinter
 pandas
 numpy
-threading
 matplotlib
 pygame
 pydub
