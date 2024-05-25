@@ -3,7 +3,7 @@
 In this folder, you'll find a
 1) environment.txt or environment.yml (should be interchangeable for our purposes) which lists all the dependencies needed for this project. You can make a new conda environment using:
 ```bash
-conda create --name my_environment --file req.txt
+conda env create -f environment.yaml
 ```
 or simply create an empty environment and import the dependencies listed in req.txt manually
 ```bash
